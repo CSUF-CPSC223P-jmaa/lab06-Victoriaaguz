@@ -65,13 +65,14 @@ def planet(mass):
     """Construct a planet of some mass."""
     assert mass > 0
     "*** YOUR CODE HERE ***"
+    return ["planet",mass]
 
 
 def mass(w):
     """Select the mass of a planet."""
     assert is_planet(w), 'must call mass on a planet'
     "*** YOUR CODE HERE ***"
-
+    return w[1]
 
 def is_planet(w):
     """Whether w is a planet."""
@@ -127,7 +128,14 @@ def balanced(m):
     True
     """
     "*** YOUR CODE HERE ***"
-
+    if not is_mobile(m): 
+        return True
+    else:
+        Left, Right = left(m) , right(m)
+        left_s, right_s = end(Left), end(Right)
+        torque_left = length(Left) * total_weight(left_s)
+        torque_right = length(Right) * total_weight(right_s)
+        return balanced(left_s) and balanced(right_s) and torque_left == torque_right
 
 def totals_tree(m):
     """Return a tree representing the mobile with its total weight at the root.
@@ -159,6 +167,17 @@ def totals_tree(m):
     True
     """
     "*** YOUR CODE HERE ***"
+    if is_planet(m):
+        return tree(total_weight(m))
+    else: 
+        l_arm = left(m)
+        r_arm = right(m)
+        l_end = end(l_arm)
+        r_end = end(r_arm)
+        l_tree = totals_tree(l_end)
+        r_tree = totals_tree(r_end)
+        return tree(total_weight(m), [l_tree,r_tree])
+
 
 
 def replace_loki_at_leaf(t, lokis_replacement):
@@ -191,6 +210,13 @@ def replace_loki_at_leaf(t, lokis_replacement):
     True
     """
     "*** YOUR CODE HERE ***"
+    if is_leaf(t) and label(t) == "loki":
+        return tree(lokis_replacement)
+    else: 
+        dead = [replace_loki_at_leaf(b, lokis_replacement) for b in branches(t)]
+        return tree(label(t), dead)
+
+
 
 
 def has_path(t, word):
@@ -225,7 +251,14 @@ def has_path(t, word):
     """
     assert len(word) > 0, 'no path for empty word.'
     "*** YOUR CODE HERE ***"
-
+    if label(t) != word[0]:
+        return False
+    elif len(word) == 1:
+        return True
+    for b in branches(t):
+        if has_path(b, word[1:]):
+            return True
+    return False
 
 def str_interval(x):
     """Return a string representation of interval x."""
@@ -249,12 +282,12 @@ def interval(a, b):
 def lower_bound(x):
     """Return the lower bound of interval x."""
     "*** YOUR CODE HERE ***"
-
+    return x[0]
 
 def upper_bound(x):
     """Return the upper bound of interval x."""
     "*** YOUR CODE HERE ***"
-
+    return x[1]
 
 def str_interval(x):
     """Return a string representation of interval x."""
@@ -283,7 +316,8 @@ def sub_interval(x, y):
     """Return the interval that contains the difference between any value in x
     and any value in y."""
     "*** YOUR CODE HERE ***"
-
+    n_y = interval(-upper_bound(y), -lower_bound(y))
+    return add_interval(x, n_y)
 
 def div_interval(x, y):
     """Return the interval that contains the quotient of any value in x divided by
